@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登陆</title>
+    <link href="//cdn.bootcss.com/bootstrap/4.0.0-alpha.2/css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+</head>
+<body>
+
+    {% for flash in get_flashed_messages() %}
+    <div class="alert alert-danger" role="alert">
+        <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+        <p>{{ flash }}</p>
+    </div>
+    {% endfor %}
+
+    <h1>Login</h1>
+    <form class="pure-form pure-form-aligned" action="/login" method="POST">
+        <fieldset>
+            <div class="pure-control-group">
+                <label for="name">Username</label>
+                <input name="username" type="text" placeholder="Username"/>
+            </div>
+
+            <div class="pure-control-group">
+                <label for="name">Password</label>
+                <input name="password" type="password" placeholder="Password"/>
+            </div>
+
+            <div class="pure-controls">
+                <button type="submit" class="pure-button pure-button-primary">Submit</button>
+                <br>
+                <br>
+                <a href="/register">注册</a>
+            </div>
+        </fieldset>
+    </form>
+
+</body>
+</html>

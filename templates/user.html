@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/pure-min.css">
+</head>
+<body>
+    {% for flash in get_flashed_messages() %}
+        <p>{{ flash }}</p>
+    {% endfor %}
+    <h1>{{ u.username }}</h1>
+
+    <br>
+    {% if user.is_user() and user != u %}
+        {% if not user.is_following(u.id)  %}
+            <a href="/follow/{{u.id}}">关注</a>
+        {% else %}
+            <a href="/unfollow/{{u.id}}">取消关注</a>
+        {% endif %}
+    {% endif %}
+    <hr>
+    <h3>我的微博</h3>
+    {% for post in posts %}
+        <h4>{{ post.timestamp}}  {{ post.content }}</h4>
+        <a href="/post/update/{{post.id}}">编辑</a>
+        <a href="/post/delete/{{post.id}}">删除</a>
+    {% endfor %}
+
+    {% if user == u or user.is_admin() %}
+        <hr>
+        <h3>朋友圈</h3>
+        {% for post in u.followed_posts() %}
+            <h4>
+                {{ post.timestamp }}
+                <a href="/user/{{post.user.username}}">{{ post.user.username}}:</a> {{ post.content }}
+                    {% for comment in post.comments.all() %}
+
+                    {% if not comment.is_delete %}
+                        <br>
+                        {% if comment.previous_comment_id == 0%}
+                            {{ comment.user.username }}: {{ comment.content }}
+                        {% else %}
+                            {{ comment.user.username }} 回复 {{ comment.previous_comment().user.username }}:
+                            {{ comment.content }}
+                        {% endif %}
+
+                        {% if user == comment.user or user.is_admin() %}
+                            <a href="/comment/update/{{comment.id}}">编辑</a>
+                            <a href="/comment/delete/{{comment.id}}">删除</a>
+                        {% else %}
+                            <a href="/comment/reply/{{comment.id}}">回复</a>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </h4>
+        {% endfor %}
+    {% endif %}
+</body>
+</html>

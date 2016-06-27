@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Post update</title>
+</head>
+<body>
+    <h1>Update Post</h1>
+    <form action="/post/update/{{post.id}}" method="POST">
+        <textarea name="content" placeholder="{{post.content}}"></textarea>
+        <br>
+        <button type="submit">发表</button>
+    </form>
+
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Post</title>
+</head>
+<body>
+    {% for flash in get_flashed_messages() %}
+        <p>{{ flash }}</p>
+    {% endfor %}
+    <h2>Post: {{ post.content }}</h2>
+    <form action="/comment/edit/{{post.id}}" method="POST">
+        <textarea name="content" placeholder="评论"></textarea>
+        <br>
+        <button type="submit">提交</button>
+    </form>
+    <hr>
+    {% for comment in post.comments.all() %}
+        <h4>
+            {% if not comment.is_delete %}
+                {{ comment.timestamp }}
+                <br>
+                {% if comment.previous_comment_id == 0%}
+                    {{ comment.user.username }}: {{ comment.content }}
+                {% else %}
+                    {{ comment.user.username }} 回复 {{ comment.previous_comment().user.username }}:
+                    {{ comment.content }}
+                {% endif %}
+
+                {% if user == comment.user or user.is_admin() %}
+                    <a href="/comment/update/{{comment.id}}">编辑</a>
+                    <a href="/comment/delete/{{comment.id}}">删除</a>
+                {% else %}
+                    <a href="/comment/reply/{{comment.id}}">回复</a>
+                {% endif %}
+            {% endif %}
+        </h4>
+    {% endfor %}
+</body>
+</html>
