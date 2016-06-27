@@ -159,7 +159,6 @@ class Comment(db.Model):
     previous_comment_id =  db.Column(db.Integer, default=0)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
-
     def __init__(self, form):
         self.content = form.get('content', None)
 
@@ -172,6 +171,7 @@ class Comment(db.Model):
     def previous_comment(self):
         reply = Comment.query.filter_by(id=self.previous_comment_id).first()
         return reply
+
 
 class AnonymousUser(object):
     def is_admin(self):

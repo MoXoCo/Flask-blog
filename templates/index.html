@@ -31,12 +31,11 @@
                     <a href="/post/update/{{post.id}}">编辑</a>
                     <a href="/post/delete/{{post.id}}">删除</a>
                 {% endif %}
-                <a href="/post/{{post.id}}">{{ post.comments.count()}}条评论</a>
+                {% if user.is_user() %}
+                    <a href="/post/{{post.id}}">{{ post.comments.count()}}条评论</a>
+                {% endif %}
             {% endif %}
         </h4>
     {% endfor %}
-
-
-
 </body>
 </html>

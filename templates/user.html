@@ -23,8 +23,10 @@
     <h3>我的微博</h3>
     {% for post in posts %}
         <h4>{{ post.timestamp}}  {{ post.content }}</h4>
-        <a href="/post/update/{{post.id}}">编辑</a>
-        <a href="/post/delete/{{post.id}}">删除</a>
+        {% if user == post.user or user.is_admin() %}
+            <a href="/post/update/{{post.id}}">编辑</a>
+            <a href="/post/delete/{{post.id}}">删除</a>
+        {% endif %}
     {% endfor %}
 
     {% if user == u or user.is_admin() %}
@@ -34,7 +36,7 @@
             <h4>
                 {{ post.timestamp }}
                 <a href="/user/{{post.user.username}}">{{ post.user.username}}:</a> {{ post.content }}
-                    {% for comment in post.comments.all() %}
+                {% for comment in post.comments.all() %}
 
                     {% if not comment.is_delete %}
                         <br>
