@@ -71,6 +71,7 @@ def register():
         return redirect(url_for('login_view'))
 
 
+
 @app.route('/user/<username>')
 def user(username):
     u = User.query.filter_by(username=username).first()
@@ -92,6 +93,7 @@ def post_view(post_id):
                            post=post,
                            user=current_user()
                            )
+
 
 
 @app.route('/post/edit', methods=['POST'])
@@ -249,7 +251,22 @@ def unfollow(user_id):
         return redirect(url_for('user', username=u.username))
 
 
+@app.route('/rename')
+def rename_view():
+    return render_template('rename.html')
+
+
+@app.route('/rename', methods=['POST'])
+def rename():
+
 
 
 if __name__ == '__main__':
+    '''
+    args = {
+        'port': 11000,
+        'debug': True,
+        'host': '0.0.0.0',
+    }
+    '''
     app.run(debug=True)
