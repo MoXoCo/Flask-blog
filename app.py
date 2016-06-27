@@ -91,9 +91,7 @@ def post_view(post_id):
     post = Post.query.get_or_404(post_id)
     return render_template('post.html',
                            post=post,
-                           user=current_user()
-                           )
-
+                           user=current_user())
 
 
 @app.route('/post/edit', methods=['POST'])
