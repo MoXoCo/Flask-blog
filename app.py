@@ -24,6 +24,7 @@ def current_user():
         u = AnonymousUser()
     return u
 
+
 def required_login(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -55,7 +56,7 @@ def login():
     user = User.query.filter_by(username=u.username).first()
     if u.validate(user):
         flash('登陆成功！')
-        log('登陆成功！')
+        log('{}登陆成功！'.format(user))
         session['user_id'] = user.id
         return redirect(url_for('index'))
     else:
@@ -83,7 +84,7 @@ def register_view():
 def register():
     u = User(request.form)
     if u.valid():
-        log('注册成功！')
+        log('{}注册成功！'.format(u))
         u.save()
         u.follow(u.id)
         return redirect(url_for('login_view'))
@@ -91,7 +92,6 @@ def register():
         flash('注册失败！')
         log('注册失败！')
         return redirect(url_for('login_view'))
-
 
 
 @app.route('/user/<username>')
@@ -127,7 +127,7 @@ def post_edit():
         return redirect(url_for('index'))
     else:
         post = Post(form)
-        post.user = user
+        post.user = current_user()
         post.save()
         flash('文章已发表！')
         log('文章已发表！')
@@ -179,15 +179,16 @@ def post_delete(post_id):
 
 @app.route('/comment/edit/<post_id>', methods=['POST'])
 def comment_edit(post_id):
+    post = Post.query.filter_by(id=post_id).first()
     form = request.form
     content = form.get('content', None)
     if len(content) == 0:
         return redirect(url_for('post_view', post_id=post_id))
     else:
-        comment = Comment(form)
-        comment.post_id = post_id
-        comment.user = current_user()
-        comment.save()
+        c = Comment(form)
+        c.post = post
+        c.user = current_user()
+        c.save()
         log('评论发表成功！')
         flash('评论发表成功！')
         return redirect(url_for('post_view', post_id=post_id))
@@ -223,12 +224,11 @@ def comment_update(comment_id):
 @required_login
 def comment_delete(comment_id):
     comment = Comment.query.get_or_404(comment_id)
-    post_id = comment.post_id
     user = current_user()
     if user.id == comment.user_id or user.is_admin():
         comment.is_delete = True
         comment.save()
-        return redirect(url_for('post_view', post_id=post_id))
+        return redirect(url_for('post_view', post_id=comment.post_id))
     else:
         abort(401)
 
@@ -247,14 +247,14 @@ def commment_reply(comment_id):
     comment = Comment.query.get_or_404(comment_id)
     content = form.get('content', None)
     if len(content) == 0:
-        return redirect(url_for('post_view', post_id=comment.post.id))
+        return redirect(url_for('post_view', post_id=comment.post_id))
     else:
         c = Comment(form)
         c.post = comment.post
         c.user = current_user()
         c.previous_comment_id = comment.id
         c.save()
-        return redirect(url_for('post_view', post_id=comment.post.id))
+        return redirect(url_for('post_view', post_id=comment.post_id))
 
 
 @app.route('/follow/<user_id>')
@@ -292,10 +292,29 @@ def rename_view():
 def rename():
     user = current_user()
     username = request.form.get('username')
-    user.username = username
-    user.save()
-    return redirect(url_for('logout'))
+    if User.query.filter_by(username=username).first() is None:
+        user.username = username
+        user.save()
+        return redirect(url_for('login_view'))
+    else:
+        abort(404)
 
+
+@app.route('/repassword')
+@required_login
+def repassword_view():
+    return render_template('repassword.html', user=current_user())
+
+
+@app.route('/repassword', methods=['POST'])
+@required_login
+def repassword():
+    user = current_user()
+    password = request.form['password']
+    log('debug repassword: ', password)
+    user.password = password
+    user.save()
+    return redirect(url_for('login_view'))
 
 
 if __name__ == '__main__':

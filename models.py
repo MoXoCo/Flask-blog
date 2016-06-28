@@ -2,7 +2,9 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import sql
 from hashlib import sha1
+from mylog import log
 import random
+
 
 db_path = 'db.sqlite'
 
@@ -130,7 +132,6 @@ class User(db.Model):
         return posts
 
 
-
 class Post(db.Model):
     __tablename__ = 'posts'
     id = db.Column(db.Integer, primary_key=True)
@@ -170,6 +171,7 @@ class Comment(db.Model):
 
     def previous_comment(self):
         reply = Comment.query.filter_by(id=self.previous_comment_id).first()
+        log('debug reply user: ', reply.user)
         return reply
 
 
