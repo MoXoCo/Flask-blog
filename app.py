@@ -282,17 +282,19 @@ def unfollow(user_id):
 
 
 @app.route('/rename')
+@required_login
 def rename_view():
-    return render_template('rename.html')
+    return render_template('rename.html', user=current_user())
 
 
 @app.route('/rename', methods=['POST'])
+@required_login
 def rename():
-    pass
-
-
-
-
+    user = current_user()
+    username = request.form.get('username')
+    user.username = username
+    user.save()
+    return redirect(url_for('logout'))
 
 
 
