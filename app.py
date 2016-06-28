@@ -13,6 +13,7 @@ from models import Comment
 from models import AnonymousUser
 
 from mylog import log
+from functools import wraps
 
 
 def current_user():
@@ -23,8 +24,19 @@ def current_user():
         u = AnonymousUser()
     return u
 
+def required_login(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        user = current_user()
+        if not user.is_user():
+            return redirect(url_for('login_view'))
+        else:
+            return f(*args, **kwargs)
+    return wrapper
+
 
 @app.route('/')
+@required_login
 def index():
     posts = Post.query.order_by(Post.timestamp.desc()).all()
     return render_template('index.html',
@@ -51,6 +63,16 @@ def login():
         log('登陆失败！')
         return redirect(url_for('login_view'))
 
+@app.route('/logout')
+@required_login
+def logout():
+    u = current_user()
+    session.pop('user_id')
+    flash('你已经注销了！')
+    log('{}已经注销了!'.format(u))
+    return redirect(url_for('login_view'))
+
+
 '''
 @app.route('/register')
 def register_view():
@@ -73,6 +95,7 @@ def register():
 
 
 @app.route('/user/<username>')
+@required_login
 def user(username):
     u = User.query.filter_by(username=username).first()
     if u is None:
@@ -87,6 +110,7 @@ def user(username):
 
 
 @app.route('/post/<post_id>')
+@required_login
 def post_view(post_id):
     post = Post.query.get_or_404(post_id)
     return render_template('post.html',
@@ -95,10 +119,8 @@ def post_view(post_id):
 
 
 @app.route('/post/edit', methods=['POST'])
+@required_login
 def post_edit():
-    user = current_user()
-    if user is None:
-        return redirect(url_for('login_view'))
     form = request.form
     content = form.get('content', None)
     if len(content) == 0:
@@ -113,6 +135,7 @@ def post_edit():
 
 
 @app.route('/post/update/<post_id>')
+@required_login
 def post_update_view(post_id):
     post = Post.query.filter_by(id=post_id).first()
     if post is None:
@@ -121,6 +144,7 @@ def post_update_view(post_id):
 
 
 @app.route('/post/update/<post_id>', methods=['POST'])
+@required_login
 def post_update(post_id):
     post = Post.query.filter_by(id=post_id).first()
     user = current_user()
@@ -139,6 +163,7 @@ def post_update(post_id):
 
 
 @app.route('/post/delete/<post_id>')
+@required_login
 def post_delete(post_id):
     post = Post.query.get_or_404(post_id)
     user = current_user()
@@ -169,12 +194,14 @@ def comment_edit(post_id):
 
 
 @app.route('/comment/update/<comment_id>')
+@required_login
 def comment_update_view(comment_id):
     comment = Comment.query.get_or_404(comment_id)
     return render_template('comment_update.html', comment=comment)
 
 
 @app.route('/comment/update/<comment_id>', methods=['POST'])
+@required_login
 def comment_update(comment_id):
     comment = Comment.query.get_or_404(comment_id)
     user = current_user()
@@ -193,6 +220,7 @@ def comment_update(comment_id):
 
 
 @app.route('/comment/delete/<comment_id>')
+@required_login
 def comment_delete(comment_id):
     comment = Comment.query.get_or_404(comment_id)
     post_id = comment.post_id
@@ -206,12 +234,14 @@ def comment_delete(comment_id):
 
 
 @app.route('/comment/reply/<comment_id>')
+@required_login
 def commment_reply_view(comment_id):
     comment = Comment.query.get_or_404(comment_id)
     return render_template('comment_reply.html', comment=comment)
 
 
 @app.route('/comment/reply/<comment_id>', methods=['POST'])
+@required_login
 def commment_reply(comment_id):
     form = request.form
     comment = Comment.query.get_or_404(comment_id)
@@ -228,6 +258,7 @@ def commment_reply(comment_id):
 
 
 @app.route('/follow/<user_id>')
+@required_login
 def follow(user_id):
     u = User.query.get_or_404(user_id)
     user = current_user()
@@ -239,6 +270,7 @@ def follow(user_id):
 
 
 @app.route('/unfollow/<user_id>')
+@required_login
 def unfollow(user_id):
     u = User.query.get_or_404(user_id)
     user = current_user()
@@ -256,6 +288,11 @@ def rename_view():
 
 @app.route('/rename', methods=['POST'])
 def rename():
+    pass
+
+
+
+
 
 
 
