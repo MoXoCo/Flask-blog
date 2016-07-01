@@ -10,10 +10,12 @@ from models import app
 from models import User
 from models import Post
 from models import Comment
+from models import At
 from models import AnonymousUser
 
 from mylog import log
 from functools import wraps
+import re
 
 
 def current_user():
@@ -23,6 +25,13 @@ def current_user():
     except KeyError:
         u = AnonymousUser()
     return u
+
+def at_users(content):
+    pattern = re.compile(r'@(\w+)\s')
+    users = pattern.findall(content)
+    log('at users: ', users)
+    return users
+
 
 
 def required_login(f):
@@ -83,7 +92,8 @@ def register_view():
 @app.route('/register', methods=['POST'])
 def register():
     u = User(request.form)
-    if u.valid():
+    user = User.query.filter_by(username=u.username).first()
+    if u.valid() and user is None:
         log('{}注册成功！'.format(u))
         u.save()
         u.follow(u.id)
@@ -98,16 +108,19 @@ def register():
 @required_login
 def user(username):
     u = User.query.filter_by(username=username).first()
-    if u is None:
-        return redirect(url_for('login_view'))
-    else:
+    user = current_user()
+    if u != user:
         u.increase_visitors()
-        posts = u.posts.order_by(Post.timestamp.desc()).all()
-        return render_template('user.html',
-                               posts=posts,
-                               u=u,
-                               user=current_user())
-
+    posts = u.posts.order_by(Post.timestamp.desc()).all()
+    ated_num = u.ats.filter_by(is_readed=False).count()
+    log('debug ated_num: ', ated_num)
+    kwargs = {
+        'posts': posts,
+        'u': u,
+        'user': user,
+        'ated_num': ated_num
+    }
+    return render_template('user.html', **kwargs)
 
 @app.route('/post/<post_id>')
 @required_login
@@ -125,13 +138,19 @@ def post_edit():
     content = form.get('content', None)
     if len(content) == 0:
         return redirect(url_for('index'))
-    else:
-        post = Post(form)
-        post.user = current_user()
-        post.save()
-        flash('文章已发表！')
-        log('文章已发表！')
-        return redirect(url_for('index'))
+    post = Post(form)
+    post.user = current_user()
+    post.save()
+    if '@' in content:
+        users = at_users(content)
+        for u in users:
+            at = At()
+            at.user = User.query.filter_by(username=u).first()
+            at.post = post
+            at.save()
+    flash('文章已发表！')
+    log('文章已发表！')
+    return redirect(url_for('index'))
 
 
 @app.route('/post/update/<post_id>')
@@ -180,18 +199,26 @@ def post_delete(post_id):
 @app.route('/comment/edit/<post_id>', methods=['POST'])
 def comment_edit(post_id):
     post = Post.query.filter_by(id=post_id).first()
+    user = current_user()
     form = request.form
     content = form.get('content', None)
     if len(content) == 0:
         return redirect(url_for('post_view', post_id=post_id))
-    else:
-        c = Comment(form)
-        c.post = post
-        c.user = current_user()
-        c.save()
-        log('评论发表成功！')
-        flash('评论发表成功！')
-        return redirect(url_for('post_view', post_id=post_id))
+    c = Comment(form)
+    c.post = post
+    c.user = user
+    c.save()
+    if '@' in content:
+        users = at_users(content)
+        for u in users:
+            at = At()
+            at.user = User.query.filter_by(username=u).first()
+            at.comment = c
+            at.post = post
+            at.save()
+    log('评论发表成功！')
+    flash('评论发表成功！')
+    return redirect(url_for('post_view', post_id=post_id))
 
 
 @app.route('/comment/update/<comment_id>')
@@ -279,6 +306,18 @@ def unfollow(user_id):
         log('{}取消对{}关注！'.format(user, u))
         flash('已取消对用户的关注!')
         return redirect(url_for('user', username=u.username))
+
+
+@app.route('/at/user/<user_id>')
+def user_ated_view(user_id):
+    u = User.query.get_or_404(user_id)
+    ats = u.ats.order_by(At.timestamp.desc()).all()
+    posts = []
+    for at in ats:
+        at.is_readed = True
+        at.save()
+        posts.append(Post.query.filter_by(id=at.post_id).first())
+    return render_template('user_ated.html', posts=posts)
 
 
 @app.route('/rename')

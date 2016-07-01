@@ -46,6 +46,7 @@ class User(db.Model):
     role = db.Column(db.Integer, default=2)
     posts = db.relationship('Post', backref='user', lazy='dynamic')
     comments = db.relationship('Comment', backref='user', lazy='dynamic')
+    ats = db.relationship('At', backref='user', lazy='dynamic')
     followed = db.relationship('Follow',
                                foreign_keys=[Follow.follower_id],
                                backref=db.backref('follower', lazy='joined'),
@@ -141,6 +142,7 @@ class Post(db.Model):
     is_delete = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     comments = db.relationship('Comment', backref='post', lazy='dynamic')
+    ats = db.relationship('At', backref='post', lazy='dynamic')
 
     def __init__(self, form):
         self.content = form.get('content', None)
@@ -160,6 +162,8 @@ class Comment(db.Model):
     previous_comment_id =  db.Column(db.Integer, default=0)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    ats = db.relationship('At', backref='comment', lazy='dynamic')
+
     def __init__(self, form):
         self.content = form.get('content', None)
 
@@ -173,6 +177,23 @@ class Comment(db.Model):
         reply = Comment.query.filter_by(id=self.previous_comment_id).first()
         log('debug reply user: ', reply.user)
         return reply
+
+class At(db.Model):
+    __tablename__ = 'ats'
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime(timezone=True),
+                          default=sql.func.now())
+    is_readed = db.Column(db.Boolean, default=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'))
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+
+
 
 
 class AnonymousUser(object):
