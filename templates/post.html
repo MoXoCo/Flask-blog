@@ -4,48 +4,47 @@
     <meta charset="UTF-8">
     <title>Post</title>
     <script src="http://cdn.bootcss.com/jquery/3.0.0/jquery.min.js"></script>
+    <script src="http://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
+    <script id="id-template-comment" type="text/x-jquery-tmpl">
+        <h4>
+            ${timestamp}
+            <br>
+            ${username}: ${content}
+            <a href="/comment/update/${id}">编辑</a>
+            <button class='id-button-delete'
+                    data-id='${id}'
+                    >删除</button>
+        </h4>
+    </script>
+    <script src="/static/weibo.js"></script>
+    <script src="/static/login.js"></script>
     <script>
-        $(document).ready(function(){
+        var bindAddCommentAction = function(){
             var button = $('#id-button-submit');
             button.on('click', function(){
-                var comment = $('#id-textarea-comment').val();
-                console.log('comment: ', comment);
-                var post_id = $('#id-text-post_id').attr('data-pid');
-                console.log('post_id: ',post_id);
-                var form = {
-                    content: comment,
-                };
-                var request = {
-                    url: '/comment/edit/' + post_id,
-                    type: 'post',
-                    data: form,
-                    success: function(data){
-                        console.log('服务器返回了: ', typeof data, data);
-                        var comment = {
-                            timestamp: data.timestamp,
-                            username: data.username,
-                            content:  data.content,
-                        };
-                        tag = comment.timestamp + '<br>' + comment.username + ': ' + comment.content + '<br>'
-                        $('#id-h4-comment').append(tag)
-                    }
-                };
-                $.ajax(request);
+                editComment();
             })
+        }
+
+        var bindDeleteAction = function(){
+            $(body).on('click', '.id-button-delete',  function(){
+
+            })
+        };
+
+        $(document).ready(function(){
+            bindAddCommentAction();
+            bindDeleteAction();
         });
     </script>
 </head>
 <body>
-    {% for flash in get_flashed_messages() %}
-        <p>{{ flash }}</p>
-    {% endfor %}
     <h2>Post: {{ post.content }}</h2>
-    <div id='id-text-post_id' data-pid='{{ post.id }}'></div>
     <textarea id="id-textarea-comment"></textarea>
     <br>
-    <button id="id-button-submit">Submit</button>
+    <button id="id-button-submit" >Submit</button>
     <hr>
-    <h4 id='id-h4-comment'></h4>
+
     {% for comment in post.comments.all() %}
         <h4>
             {% if not comment.is_delete %}
@@ -60,12 +59,14 @@
 
                 {% if user == comment.user or user.is_admin() %}
                     <a href="/comment/update/{{comment.id}}">编辑</a>
-                    <a href="/comment/delete/{{comment.id}}">删除</a>
+                    <button class="id-button-delete"
+                            data-id="{{comment.id}}">删除</button>
                 {% else %}
                     <a href="/comment/reply/{{comment.id}}">回复</a>
                 {% endif %}
             {% endif %}
         </h4>
     {% endfor %}
+    <div id='id-div-add' data-id='{{ post.id }}'></div>
 </body>
 </html>

@@ -9,74 +9,53 @@
         <h4>
             ${ timestamp }
             <br>
-            <a href="/user/${username}">${username}: </a>${ content }
+            <a href="/user/${username}">${username}: </a>${content}
             <a href="/post/update/${id}">编辑</a>
             <button class='id-button-delete'
-                    data-id='${ id }'
-                    data-name='${ username }'
+                    data-id='${id}'
+                    data-name='${username}'
                     >删除</button>
         </h4>
     </script>
+    <script src="/static/weibo.js"></script>
+    <script src="/static/login.js"></script>
     <script>
         var bindAddPostAction = function(){
             var button = $('#id-button-submit');
             button.on('click', function(){
-                // console.log('click')
-                var post = $('#id-textarea-post').val();
-                console.log('post: ', post);
-                var form = {
-                    content: post,
-                };
-                var url = '/post/edit'
-                var data = JSON.stringify(form)
+                editPost();
+
+            })
+        }
+        var bindDeleteAction = function(){
+            $('body').on('click', '.id-button-delete', function(){
+                var self = $(this);
+                var post_id = this.dataset.id;
+                var name = this.dataset.name;
+                console.log('post ',post_id, name);
                 var request = {
-                    url: url,
-                    type: 'post',
-                    data: data,
-                    contentType: 'application/json',
+                    url: '/post/delete/' + post_id,
+                    type: 'get',
                     success: function(data){
-                        console.log('服务器返回了： ',typeof data, data);
-                        console.log('成功添加微博！');
-                        $('#id-template-post').tmpl(data).insertAfter('#id-h1-add')
+                        console.log('成功删除 ',post_id)
+                        console.log('data: ',data);
+                        if(data.success){
+                            self.parent().remove();
+                        }
                     }
                 };
                 $.ajax(request);
-            })
+            });
         }
 
-            var bindDeleteAction = function(){
-                $('body').on('click', '.id-button-delete', function(){
-                    var self = $(this);
-                    var post_id = this.dataset.id;
-                    var name = this.dataset.name;
-                    console.log('post ',post_id, name);
-                    var request = {
-                        url: '/post/delete/' + post_id,
-                        type: 'get',
-                        success: function(data){
-                            console.log('成功删除 ',post_id)
-                            console.log('data: ',data);
-                            if(data.success){
-                                self.parent().remove();
-                            }
-                        }
-                    };
-                    $.ajax(request);
-                });
-            }
-
-
-            $(document).ready(function(){
-                bindDeleteAction();
-                bindAddPostAction();
-            });
+        $(document).ready(function(){
+            bindDeleteAction();
+            bindAddPostAction();
+        });
 
     </script>
 </head>
 <body>
-    {% for flash in get_flashed_messages() %}
-        <p>{{ flash }}</p>
-    {% endfor %}
     <br>
     <textarea id="id-textarea-post"></textarea>
     <br>

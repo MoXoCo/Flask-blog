@@ -112,8 +112,13 @@ class User(db.Model):
         password_equals = self.password_hash == self._hashed_string(password)
         return username_equals and password_equals
 
-    def json(self):
-        return self.__dict__
+    def dict(self):
+        d = {
+            'username': self.username,
+            'timestamp': self.timestamp,
+
+        }
+        return d
 
     #判断是否关注了uer_id
     def is_following(self, user_id):
@@ -161,7 +166,7 @@ class Post(db.Model):
     ats = db.relationship('At', backref='post', lazy='dynamic')
 
     def __init__(self, form):
-        self.content = form.get('content', None)
+        self.content = form.get('post', None)
 
     def save(self):
         db.session.add(self)
@@ -190,7 +195,7 @@ class Comment(db.Model):
     ats = db.relationship('At', backref='comment', lazy='dynamic')
 
     def __init__(self, form):
-        self.content = form.get('content', None)
+        self.content = form.get('comment', None)
 
 
     def save(self):
@@ -202,6 +207,7 @@ class Comment(db.Model):
         reply = Comment.query.filter_by(id=self.previous_comment_id).first()
         log('debug reply user: ', reply.user)
         return reply
+
 
     def dict(self):
         d = {
@@ -229,7 +235,21 @@ class At(db.Model):
         return u'<At {}>'.format(self.id)
 
 
+class ResponseData(object):
+    def __init__(self, msgs=None, data=''):
+        self.message = msgs
+        self.data = data
 
+
+    def success(self, next_url=''):
+        self.success = True
+        self.next = next_url
+        return self.__dict__
+
+
+    def error(self):
+        self.success = False
+        return self.__dict__
 
 
 

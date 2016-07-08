@@ -13,6 +13,7 @@ from models import Post
 from models import Comment
 from models import At
 from models import AnonymousUser
+from models import ResponseData as response
 
 from mylog import log
 from functools import wraps
@@ -57,7 +58,6 @@ def required_login(f):
 @required_login
 def index():
     posts = Post.query.order_by(Post.timestamp.desc()).all()
-    #json_posts = [post.dict() for post in posts]
     return render_template('index.html',
                            posts=posts,
                            user=current_user())
@@ -71,24 +71,18 @@ def login_view():
 @app.route('/login', methods=['POST'])
 def login():
     form = request.get_json()
-    log('debug login form: ', form)
     username = form.get('username', '')
     user = User.query.filter_by(username=username).first()
-    r = {
-        'success': False,
-    }
-    log('user is not None: ', user is not None)
-    log('auth: ', user.validate_auth(form))
     if user is not None and user.validate_auth(form):
-        r['success'] = True
-        r['next'] = url_for('index')
-        r['message'] = '登录成功'
-        log('r.next, ',r['next'])
-        session.permanent = True
+        next = url_for('index')
+        msgs= '登录成功'
+        r = response(msgs).success(next)
+        #log('r, ',r)
+        #session.permanent = True
         session['username'] = username
     else:
-        r['success'] = False
-        r['message'] = '登录失败'
+        msgs = '登录失败'
+        r = response(msgs=msgs).error()
     return jsonify(r)
 
 
@@ -101,28 +95,20 @@ def logout():
     return redirect(url_for('login_view'))
 
 
-'''
-@app.route('/register')
-def register_view():
-    return render_template('register.html')
-'''
-
 @app.route('/register', methods=['POST'])
 def register():
     form = request.get_json()
-    log('debug register form: ', form)
     u = User(form)
-    r = {}
     status, msgs = u.valid()
     if status:
         u.save()
-        r['success'] = True
         #session.permanet = True
         session['username'] = u.username
-        r['next'] = url_for('login_view')
+        next = url_for('login_view')
+        r = response().success(next)
     else:
-        r['success'] = False
-        r['message'] = '\n'.join(msgs)
+        message = '\n'.join(msgs)
+        r = response(msgs=message).error()
     return jsonify(r)
 
 
@@ -132,8 +118,6 @@ def register():
 def user(username):
     u = User.query.filter_by(username=username).first()
     user = current_user()
-    if u != user:
-        u.increase_visitors()
     posts = u.posts.order_by(Post.timestamp.desc()).all()
     ated_num = u.ats.filter_by(is_readed=False).count()
     log('debug ated_num: ', ated_num)
@@ -158,31 +142,30 @@ def post_view(post_id):
 @required_login
 def post_edit():
     form = request.get_json()
-    content = form.get('content', None)
+    log('debug form: ', form)
+    content = form.get('post', None)
     log('debug /post/edit ', content)
-    if len(content) == 0:
-        return redirect(url_for('index'))
+    u = current_user()
     post = Post(form)
-    post.user = current_user()
+    post.user = u
     post.save()
     if '@' in content:
-        users = at_users(content)
-        for u in users:
+        users_name = at_users(content)
+        for username in users_name:
             at = At()
-            at.user = User.query.filter_by(username=u).first()
+            at.user = User.query.filter_by(username=username).first()
             at.post = post
             at.save()
-    flash('文章已发表！')
     log('文章已发表！')
-    log('timestamp: ', )
     data = {
-        'success': True,
         'timestamp': strfttime(),
-        'username': current_user().username,
+        'username': u.username,
         'content': content,
         'id': post.id,
     }
-    return jsonify(data)
+    r = response(data=data).success()
+    log('debug r: ',r)
+    return jsonify(r)
 
 
 @app.route('/post/update/<post_id>')
@@ -221,23 +204,19 @@ def post_delete(post_id):
     if user.id == post.user.id or user.is_admin():
         post.is_delete = True
         post.save()
-        flash('文章已删除！')
         log('文章已删除！')
-        data = {
-            'success': True,
-            'location': '/'
-        }
-        return jsonify(data)
-    else:
-        abort(401)
+        #next = '/'
+        r = response().success()
+        return jsonify(r)
+
 
 
 @app.route('/comment/edit/<post_id>', methods=['POST'])
 def comment_edit(post_id):
-    post = Post.query.filter_by(id=post_id).first()
+    post = Post.query.get_or_404(post_id)
     user = current_user()
-    form = request.form
-    content = form.get('content', None)
+    form = request.get_json()
+    content = form.get('comment', None)
     log('debug content: ',content)
     if len(content) == 0:
         return redirect(url_for('post_view', post_id=post_id))
@@ -254,13 +233,15 @@ def comment_edit(post_id):
             at.post = post
             at.save()
     log('评论发表成功！')
-    flash('评论发表成功！')
     data = {
         'timestamp': strfttime(),
-        'username': current_user().username,
+        'username': user.username,
         'content': content,
+        'id': c.id,
     }
-    return jsonify(data)
+    r = response(data=data).success()
+    log('debug comment r:', r)
+    return jsonify(r)
 
 
 @app.route('/comment/update/<comment_id>')
@@ -297,9 +278,11 @@ def comment_delete(comment_id):
     if user.id == comment.user_id or user.is_admin():
         comment.is_delete = True
         comment.save()
-        return redirect(url_for('post_view', post_id=comment.post_id))
+        r = response().success()
     else:
-        abort(401)
+        msgs = '删除失败！'
+        r = response(msgs).error()
+    return r
 
 
 @app.route('/comment/reply/<comment_id>')
