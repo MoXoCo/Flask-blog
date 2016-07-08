@@ -7,6 +7,7 @@
 <body>
         {% for post in posts %}
         <h4>
+            <br>
             {{ post.timestamp }}
             <a href="/user/{{post.user.username}}">{{ post.user.username}}:</a> {{ post.content }}
 

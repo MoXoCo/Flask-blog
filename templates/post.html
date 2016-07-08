@@ -3,18 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <title>Post</title>
+    <script src="http://cdn.bootcss.com/jquery/3.0.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            var button = $('#id-button-submit');
+            button.on('click', function(){
+                var comment = $('#id-textarea-comment').val();
+                console.log('comment: ', comment);
+                var post_id = $('#id-text-post_id').attr('data-pid');
+                console.log('post_id: ',post_id);
+                var form = {
+                    content: comment,
+                };
+                var request = {
+                    url: '/comment/edit/' + post_id,
+                    type: 'post',
+                    data: form,
+                    success: function(data){
+                        console.log('服务器返回了: ', typeof data, data);
+                        var comment = {
+                            timestamp: data.timestamp,
+                            username: data.username,
+                            content:  data.content,
+                        };
+                        tag = comment.timestamp + '<br>' + comment.username + ': ' + comment.content + '<br>'
+                        $('#id-h4-comment').append(tag)
+                    }
+                };
+                $.ajax(request);
+            })
+        });
+    </script>
 </head>
 <body>
     {% for flash in get_flashed_messages() %}
         <p>{{ flash }}</p>
     {% endfor %}
     <h2>Post: {{ post.content }}</h2>
-    <form action="/comment/edit/{{post.id}}" method="POST">
-        <textarea name="content" placeholder="评论"></textarea>
-        <br>
-        <button type="submit">提交</button>
-    </form>
+    <div id='id-text-post_id' data-pid='{{ post.id }}'></div>
+    <textarea id="id-textarea-comment"></textarea>
+    <br>
+    <button id="id-button-submit">Submit</button>
     <hr>
+    <h4 id='id-h4-comment'></h4>
     {% for comment in post.comments.all() %}
         <h4>
             {% if not comment.is_delete %}

@@ -17,6 +17,8 @@ app.secret_key = 'a random string'
 db = SQLAlchemy(app)
 
 
+
+
 class Follow(db.Model):
     __tablename__ = 'follows'
     follower_id = db.Column(db.Integer, db.ForeignKey('users.id'),
@@ -40,7 +42,6 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(), unique=True)
     password_hash= db.Column(db.String())
-    visit = db.Column(db.Integer, default=0)
     timestamp = db.Column(db.DateTime(timezone=True),
                           default=sql.func.now())
     role = db.Column(db.Integer, default=2)
@@ -66,7 +67,7 @@ class User(db.Model):
     def __repr__(self):
         return u'<User {}>'.format(self.username)
 
-    def _convert_to_sha1(self, string):
+    def _hashed_string(self, string):
         return sha1(string.encode('utf-8')).hexdigest()
 
     @property
@@ -75,7 +76,7 @@ class User(db.Model):
 
     @password.setter
     def password(self, password):
-        self.password_hash = self._convert_to_sha1(password)
+        self.password_hash = self._hashed_string(password)
 
     def is_user(self):
         return True
@@ -88,16 +89,31 @@ class User(db.Model):
         db.session.commit()
 
     def valid(self):
-        return len(self.username) >= 3
+        valid_username = User.query.filter_by(username=self.username).first() == None
+        valid_username_len = len(self.username) >= 3
+        valid_password_len = len(self.password_hash) >= 3
+        msgs = []
+        if not valid_username:
+            message = '用户名已经存在'
+            msgs.append(message)
+        elif not valid_username_len:
+            message = '用户名长度必须大于等于 6'
+            msgs.append(message)
+        elif not valid_password_len:
+            message = '密码长度必须大于等于 6'
+            msgs.append(message)
+        status = valid_username and valid_username_len and valid_password_len
+        return status, msgs
 
-    def validate(self, user):
-        if isinstance(user, User):
-            auth_username = self.username == user.username
-            auth_password = self.password_hash == user.password_hash
-            return auth_username and auth_password
+    def validate_auth(self, form):
+        username = form.get('username', '')
+        password = form.get('password', '')
+        username_equals = self.username == username
+        password_equals = self.password_hash == self._hashed_string(password)
+        return username_equals and password_equals
 
-    def increase_visitors(self):
-        self.visit += random.randint(1,5)
+    def json(self):
+        return self.__dict__
 
     #判断是否关注了uer_id
     def is_following(self, user_id):
@@ -151,6 +167,15 @@ class Post(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def dict(self):
+        d = {
+            'content': self.content,
+            'timestamp': self.timestamp,
+            'is_delete': self.is_delete,
+            'comments': [comment.dict() for comment in self.comments],
+        }
+        return d
+
 
 class Comment(db.Model):
     __tablename__ = 'comments'
@@ -178,6 +203,14 @@ class Comment(db.Model):
         log('debug reply user: ', reply.user)
         return reply
 
+    def dict(self):
+        d = {
+            'content': self.content,
+            'timestamp': self.timestamp,
+            'is_delete': self.is_delete,
+        }
+        return d
+
 class At(db.Model):
     __tablename__ = 'ats'
     id = db.Column(db.Integer, primary_key=True)
@@ -191,6 +224,11 @@ class At(db.Model):
     def save(self):
         db.session.add(self)
         db.session.commit()
+
+    def __repr__(self):
+        return u'<At {}>'.format(self.id)
+
+
 
 
 

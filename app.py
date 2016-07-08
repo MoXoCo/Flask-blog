@@ -5,6 +5,7 @@ from flask import url_for
 from flask import session
 from flask import request
 from flask import flash
+from flask import jsonify
 
 from models import app
 from models import User
@@ -16,12 +17,20 @@ from models import AnonymousUser
 from mylog import log
 from functools import wraps
 import re
+import time
+
+def strfttime():
+    t = time.time()
+    localtime = time.localtime(t)
+    patten = '%Y-%m-%d %H:%M:%S'
+    tt = time.strftime(patten,localtime)
+    return tt
 
 
 def current_user():
     try:
-        user_id = session['user_id']
-        u = User.query.filter_by(id=user_id).first()
+        username = session['username']
+        u = User.query.filter_by(username=username).first()
     except KeyError:
         u = AnonymousUser()
     return u
@@ -31,7 +40,6 @@ def at_users(content):
     users = pattern.findall(content)
     log('at users: ', users)
     return users
-
 
 
 def required_login(f):
@@ -49,6 +57,7 @@ def required_login(f):
 @required_login
 def index():
     posts = Post.query.order_by(Post.timestamp.desc()).all()
+    #json_posts = [post.dict() for post in posts]
     return render_template('index.html',
                            posts=posts,
                            user=current_user())
@@ -61,24 +70,33 @@ def login_view():
 
 @app.route('/login', methods=['POST'])
 def login():
-    u = User(request.form)
-    user = User.query.filter_by(username=u.username).first()
-    if u.validate(user):
-        flash('登陆成功！')
-        log('{}登陆成功！'.format(user))
-        session['user_id'] = user.id
-        return redirect(url_for('index'))
+    form = request.get_json()
+    log('debug login form: ', form)
+    username = form.get('username', '')
+    user = User.query.filter_by(username=username).first()
+    r = {
+        'success': False,
+    }
+    log('user is not None: ', user is not None)
+    log('auth: ', user.validate_auth(form))
+    if user is not None and user.validate_auth(form):
+        r['success'] = True
+        r['next'] = url_for('index')
+        r['message'] = '登录成功'
+        log('r.next, ',r['next'])
+        session.permanent = True
+        session['username'] = username
     else:
-        flash('登陆失败！')
-        log('登陆失败！')
-        return redirect(url_for('login_view'))
+        r['success'] = False
+        r['message'] = '登录失败'
+    return jsonify(r)
+
 
 @app.route('/logout')
 @required_login
 def logout():
     u = current_user()
-    session.pop('user_id')
-    flash('你已经注销了！')
+    session.pop('username')
     log('{}已经注销了!'.format(u))
     return redirect(url_for('login_view'))
 
@@ -91,17 +109,22 @@ def register_view():
 
 @app.route('/register', methods=['POST'])
 def register():
-    u = User(request.form)
-    user = User.query.filter_by(username=u.username).first()
-    if u.valid() and user is None:
-        log('{}注册成功！'.format(u))
+    form = request.get_json()
+    log('debug register form: ', form)
+    u = User(form)
+    r = {}
+    status, msgs = u.valid()
+    if status:
         u.save()
-        u.follow(u.id)
-        return redirect(url_for('login_view'))
+        r['success'] = True
+        #session.permanet = True
+        session['username'] = u.username
+        r['next'] = url_for('login_view')
     else:
-        flash('注册失败！')
-        log('注册失败！')
-        return redirect(url_for('login_view'))
+        r['success'] = False
+        r['message'] = '\n'.join(msgs)
+    return jsonify(r)
+
 
 
 @app.route('/user/<username>')
@@ -134,8 +157,9 @@ def post_view(post_id):
 @app.route('/post/edit', methods=['POST'])
 @required_login
 def post_edit():
-    form = request.form
+    form = request.get_json()
     content = form.get('content', None)
+    log('debug /post/edit ', content)
     if len(content) == 0:
         return redirect(url_for('index'))
     post = Post(form)
@@ -150,7 +174,15 @@ def post_edit():
             at.save()
     flash('文章已发表！')
     log('文章已发表！')
-    return redirect(url_for('index'))
+    log('timestamp: ', )
+    data = {
+        'success': True,
+        'timestamp': strfttime(),
+        'username': current_user().username,
+        'content': content,
+        'id': post.id,
+    }
+    return jsonify(data)
 
 
 @app.route('/post/update/<post_id>')
@@ -191,7 +223,11 @@ def post_delete(post_id):
         post.save()
         flash('文章已删除！')
         log('文章已删除！')
-        return redirect(url_for('index'))
+        data = {
+            'success': True,
+            'location': '/'
+        }
+        return jsonify(data)
     else:
         abort(401)
 
@@ -202,6 +238,7 @@ def comment_edit(post_id):
     user = current_user()
     form = request.form
     content = form.get('content', None)
+    log('debug content: ',content)
     if len(content) == 0:
         return redirect(url_for('post_view', post_id=post_id))
     c = Comment(form)
@@ -218,7 +255,12 @@ def comment_edit(post_id):
             at.save()
     log('评论发表成功！')
     flash('评论发表成功！')
-    return redirect(url_for('post_view', post_id=post_id))
+    data = {
+        'timestamp': strfttime(),
+        'username': current_user().username,
+        'content': content,
+    }
+    return jsonify(data)
 
 
 @app.route('/comment/update/<comment_id>')
@@ -308,11 +350,16 @@ def unfollow(user_id):
         return redirect(url_for('user', username=u.username))
 
 
+
 @app.route('/at/user/<user_id>')
 def user_ated_view(user_id):
     u = User.query.get_or_404(user_id)
-    ats = u.ats.order_by(At.timestamp.desc()).all()
+    ats = u.ats.filter_by(is_readed=False).order_by(At.timestamp).all()
     posts = []
+    log('debug ats: ',ats)
+    if len(ats) == 0:
+        ats = u.ats.order_by(At.timestamp.desc()).all()
+    log('debug ats: ', ats)
     for at in ats:
         at.is_readed = True
         at.save()
@@ -354,6 +401,11 @@ def repassword():
     user.password = password
     user.save()
     return redirect(url_for('login_view'))
+
+
+@app.route('/test')
+def test():
+    return render_template('registers.html')
 
 
 if __name__ == '__main__':

@@ -19,7 +19,7 @@
             <a href="/unfollow/{{u.id}}">取消关注</a>
         {% endif %}
     {% else %}
-        <a href="/at/user/{{ user.id }}" >@我的{{ated_num}}</a>
+        <a href="/at/user/{{ user.id }}" >@我的({{ated_num}})</a>
     {% endif %}
 
     {% if user == u or user.is_admin() %}
