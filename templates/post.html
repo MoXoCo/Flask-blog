@@ -27,8 +27,21 @@
         }
 
         var bindDeleteAction = function(){
-            $(body).on('click', '.id-button-delete',  function(){
-
+            $('body').on('click', '.id-button-delete',  function(){
+                var self = $(this);
+                var comment_id = this.dataset.id;
+                log('comment_id: ', comment_id);
+                var request = {
+                    url: '/comment/delete/' + comment_id,
+                    type: 'get',
+                    success: function(r){
+                        log('删除评论: ', comment_id);
+                        if(r.success){
+                            self.parent().remove();
+                        }
+                    }
+                };
+                $.ajax(request);
             })
         };
 

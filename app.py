@@ -279,10 +279,7 @@ def comment_delete(comment_id):
         comment.is_delete = True
         comment.save()
         r = response().success()
-    else:
-        msgs = '删除失败！'
-        r = response(msgs).error()
-    return r
+    return jsonify(r)
 
 
 @app.route('/comment/reply/<comment_id>')
@@ -392,11 +389,11 @@ def test():
 
 
 if __name__ == '__main__':
-    '''
+
     args = {
         'port': 11000,
         'debug': True,
         'host': '0.0.0.0',
     }
-    '''
-    app.run(debug=True)
+
+    #app.run(debug=True)

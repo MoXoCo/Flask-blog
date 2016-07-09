@@ -112,3 +112,7 @@ var editComment = function () {
     }
    weibo.editComment(form, success, error);
 };
+
+var deletePost = function () {
+    weibo.deletePost();
+};

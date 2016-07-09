@@ -24,6 +24,24 @@ var formFromKeys = function(keys, prefix) {
 // weibo API
 var weibo = {};
 
+weibo.delete = function(url) {
+    var self = $(this);
+    var id = $('.id-button-delete').attr('data-id');
+    log('id: ', id)
+    var request = {
+        url: url + '/' + id,
+        type: 'get',
+        success: function(r) {
+            log('get success: ', url, r);
+            if(r.success){
+                log('删除成功： ',id, r)
+                self.parent().remove();
+            }
+        }
+    };
+    $.ajax(request);
+};
+
 weibo.post = function(url, form, success, error) {
     var data = JSON.stringify(form);
     var request = {
@@ -64,4 +82,9 @@ weibo.editComment = function(form, success, error) {
     log('post_id',post_id);
     var url = '/comment/edit/' + post_id;
     this.post(url, form, success, error);
+};
+
+weibo.deletePost = function() {
+    var url = '/post/delete';
+    this.delete(url);
 };

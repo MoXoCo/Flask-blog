@@ -15,6 +15,7 @@
                     data-id='${id}'
                     data-name='${username}'
                     >删除</button>
+            <a href='/post/${id}'>0条评论</a>
         </h4>
     </script>
     <script src="/static/weibo.js"></script>
@@ -29,23 +30,8 @@
         }
         var bindDeleteAction = function(){
             $('body').on('click', '.id-button-delete', function(){
-                var self = $(this);
-                var post_id = this.dataset.id;
-                var name = this.dataset.name;
-                console.log('post ',post_id, name);
-                var request = {
-                    url: '/post/delete/' + post_id,
-                    type: 'get',
-                    success: function(data){
-                        console.log('成功删除 ',post_id)
-                        console.log('data: ',data);
-                        if(data.success){
-                            self.parent().remove();
-                        }
-                    }
-                };
-                $.ajax(request);
-            });
+                deletePost();
+            })
         }
 
         $(document).ready(function(){
