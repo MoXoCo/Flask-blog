@@ -30,7 +30,10 @@
         }
         var bindDeleteAction = function(){
             $('body').on('click', '.id-button-delete', function(){
-                deletePost();
+                var self = $(this);
+                var post_id = this.dataset.id;
+                log('id: ', post_id);
+                deletePost(post_id, self);
             })
         }
 

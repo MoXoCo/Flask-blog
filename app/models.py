@@ -2,7 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import sql
 from hashlib import sha1
-from mylog import log
+from .mylog import log
 import random
 
 
@@ -10,6 +10,7 @@ db_path = 'db.sqlite'
 
 app = Flask(__name__)
 
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = \
     'sqlite:///{}'.format(db_path)
 app.secret_key = 'a random string'

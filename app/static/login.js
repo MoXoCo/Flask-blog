@@ -86,7 +86,6 @@ var editPost = function () {
             log('服务器返回了： ',typeof r, r);
             log('成功添加微博！');
             $('#id-template-post').tmpl(r.data).insertAfter('#id-h1-add')
-
         }
     };
     var error = function (err) {
@@ -113,6 +112,10 @@ var editComment = function () {
    weibo.editComment(form, success, error);
 };
 
-var deletePost = function () {
-    weibo.deletePost();
+var deletePost = function (id, self) {
+    weibo.deletePost(id, self);
+};
+
+var deleteComment = function (id, self) {
+    weibo.deleteComment(id, self);
 };
