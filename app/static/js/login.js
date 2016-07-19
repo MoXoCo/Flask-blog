@@ -18,14 +18,7 @@ var registerForm = function () {
     return form;
 };
 
-var editCommentForm = function () {
-    var keys = [
-        'comment',
-    ];
-    var editPostPrefix = 'id-textarea-';
-    var form = formFromKeys(keys, editPostPrefix);
-    return form;
-};
+
 
 // actions
 var register = function () {
@@ -69,19 +62,3 @@ var login = function () {
     weibo.login(form, success, error);
 };
 
-var editComment = function () {
-    var form = editCommentForm();
-    var success = function (r) {
-        log('edit comment: ', r);
-        if (r.success) {
-            log('服务器返回了： ',typeof r, r);
-            log('成功添加评论！');
-            $('#id-template-comment').tmpl(r.data).insertBefore('#id-div-add')
-        }
-    };
-    var error = function (err) {
-        log('edit comment: ', err);
-        alert(err)
-    }
-   weibo.editComment(form, success, error);
-};
