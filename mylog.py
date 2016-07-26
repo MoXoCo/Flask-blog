@@ -6,4 +6,3 @@ def log(*args):
     patten = '%Y-%m-%d %H:%M:%S'
     tt = time.strftime(patten, localtime)
     print(tt, *args)
-

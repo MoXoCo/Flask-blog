@@ -14,7 +14,7 @@ from ..models import Comment
 from ..models import At
 from ..models import AnonymousUser
 from ..models import ResponseData as response
-from ..mylog import log
+from mylog import log
 from . import main
 
 from functools import wraps
@@ -162,7 +162,6 @@ def post_delete(post_id):
         return jsonify(r)
 
 
-
 @main.route('/comment/edit/<post_id>', methods=['POST'])
 def comment_edit(post_id):
     post = Post.query.get_or_404(post_id)
@@ -284,7 +283,6 @@ def unfollow(user_id):
         return redirect(url_for('.user', username=u.username))
 
 
-
 @main.route('/at/user/<user_id>')
 def user_ated_view(user_id):
     u = User.query.get_or_404(user_id)
@@ -299,6 +297,10 @@ def user_ated_view(user_id):
         at.save()
         posts.append(Post.query.filter_by(id=at.post_id).first())
     return render_template('user_ated.html', posts=posts)
+
+@main.route('/test')
+def test_view():
+    return render_template('test.html')
 
 
 

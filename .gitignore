@@ -1,0 +1,15 @@
+# 常用 gitignore
+__pycache__/
+
+*.pyc
+
+.idea/*
+
+tmp/*
+
+db.sqlite
+
+.DS_Store
+
+test.html
+~

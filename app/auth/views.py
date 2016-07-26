@@ -9,7 +9,7 @@ from flask import abort
 
 from ..models import User
 from ..models import ResponseData as response
-from ..mylog import log
+from mylog import log
 from ..main.views import required_login
 from ..main.views import current_user
 

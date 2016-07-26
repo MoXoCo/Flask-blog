@@ -2,8 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import sql
 from hashlib import sha1
-from .mylog import log
-import random
+from mylog import log
 
 
 db_path = 'db.sqlite'
