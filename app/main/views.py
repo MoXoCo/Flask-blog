@@ -37,6 +37,7 @@ def current_user():
         u = AnonymousUser()
     return u
 
+
 def at_users(content):
     pattern = re.compile(r'@(\w+)\s')
     users = pattern.findall(content)

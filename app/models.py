@@ -253,7 +253,6 @@ class ResponseData(object):
 
 
 
-
 class AnonymousUser(object):
     def is_admin(self):
         return False

@@ -3,23 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <title>主页</title>
-    <script src="http://cdn.bootcss.com/jquery/3.0.0/jquery.min.js"></script>
-    <script src="http://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
-    <script id="id-template-post" type="text/x-jquery-tmpl">
-        <h4>
-            ${ timestamp }
-            <br>
-            <a href="/user/${username}">${username}: </a>${content}
-            <a href="/post/update/${id}">编辑</a>
-            <button class='id-button-delete'
-                    data-id='${id}'
-                    data-name='${username}'
-                    >删除</button>
-            <a href='/post/${id}'>0条评论</a>
-        </h4>
+    <script src="/static/js/jquery.js"></script>
+    <script>
+        var postTemplate = function(post) {
+            var p = post;
+            var timestamp = p.timestamp;
+            var username = p.username;
+            var content = p.content;
+            var id = p.id
+            var t = `
+                <h4>
+                    ${ timestamp }
+                    <br>
+                    <a href="/user/${username}">${username}: </a>${content}
+                    <a href="/post/update/${id}">编辑</a>
+                    <button class='id-button-delete'
+                            data-id='${id}'
+                            data-name='${username}'
+                            >删除</button>
+                    <a href='/post/${id}'>0条评论</a>
+                </h4>
+            `
+            return t;
+        };
     </script>
-    <script src="/static/weibo.js"></script>
-    <script src="/static/login.js"></script>
+    <script src="/static/js/weibo.js"></script>
+    <script src="/static/js/login.js"></script>
+    <script src="/static/js/post.js"></script>
     <script>
         var bindAddPostAction = function(){
             var button = $('#id-button-submit');
@@ -50,7 +60,7 @@
     <br>
     <button id="id-button-submit">Submit</button>
     <hr>
-    <h1 id='id-h1-add'>Posts</h1>
+    <h1 class="div-posts">Posts</h1>
     {% for post in posts %}
         <h4>
             {% if not post.is_delete %}
@@ -68,6 +78,7 @@
             {% endif %}
         </h4>
     {% endfor %}
+
 
 </body>
 </html>

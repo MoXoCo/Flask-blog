@@ -14,7 +14,8 @@ var editPost = function () {
         if (r.success) {
             log('服务器返回了： ',typeof r, r);
             log('成功添加微博！');
-            $('#id-template-post').tmpl(r.data).insertAfter('#id-h1-add')
+            var t = postTemplate(r.data)
+            $('.div-posts').after(t)
             $('#id-textarea-post').val('')
         }
     };
