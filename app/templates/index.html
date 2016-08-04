@@ -4,81 +4,188 @@
     <meta charset="UTF-8">
     <title>主页</title>
     <script src="/static/js/jquery.js"></script>
-    <script>
-        var postTemplate = function(post) {
-            var p = post;
-            var timestamp = p.timestamp;
-            var username = p.username;
-            var content = p.content;
-            var id = p.id
-            var t = `
-                <h4>
-                    ${ timestamp }
-                    <br>
-                    <a href="/user/${username}">${username}: </a>${content}
-                    <a href="/post/update/${id}">编辑</a>
-                    <button class='id-button-delete'
-                            data-id='${id}'
-                            data-name='${username}'
-                            >删除</button>
-                    <a href='/post/${id}'>0条评论</a>
-                </h4>
-            `
-            return t;
-        };
-    </script>
-    <script src="/static/js/weibo.js"></script>
-    <script src="/static/js/login.js"></script>
-    <script src="/static/js/post.js"></script>
-    <script>
-        var bindAddPostAction = function(){
-            var button = $('#id-button-submit');
-            button.on('click', function(){
-                editPost();
 
-            })
-        }
-        var bindDeleteAction = function(){
-            $('body').on('click', '.id-button-delete', function(){
-                var self = $(this);
-                var post_id = this.dataset.id;
-                log('id: ', post_id);
-                deletePost(post_id, self);
-            })
-        }
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/static/js/bootstrap.min.js"></script>
 
-        $(document).ready(function(){
-            bindDeleteAction();
-            bindAddPostAction();
+     <!-- Bootstrap Core CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="/static/css/sb-admin.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <script src="/static/js/html5shiv.js"></script>
+    <script src="/static/js/respond.js"></script>
+    <script src="/static/js/api_js/api.js"></script>
+    <script src="/static/js/api_js/post.js"></script>
+    <script>
+    // 绑定事件
+    var bindActions = function() {
+        // 添加文章
+        $('#id-button-submit').on('click', function() {
+            addNewPost();
         });
 
+        // 删除文章
+        $(document).on('click', '.button-delete', function() {
+            var post_id = this.dataset.pid;
+            deletePost(post_id);
+        });
+    };
+
+    $(document).ready(function() {
+        bindActions();
+    });
     </script>
 </head>
 <body>
-    <br>
-    <textarea id="id-textarea-post"></textarea>
-    <br>
-    <button id="id-button-submit">Submit</button>
-    <hr>
-    <h1 class="div-posts">Posts</h1>
-    {% for post in posts %}
-        <h4>
-            {% if not post.is_delete %}
-                {{ post.timestamp }}
-                <br>
-                <a href="/user/{{post.user.username}}">{{ post.user.username}}: </a>{{ post.content }}
-                {% if user.id == post.user_id or user.is_admin() %}
-                    <a href="/post/update/{{post.id}}">编辑</a>
-                    <button class='id-button-delete'
-                            data-id='{{ post.id }}'
-                            data-name='{{ post.user.username }}'
-                            >删除</button>
-                {% endif %}
-                <a href="/post/{{post.id}}">{{ post.comments.count()}}条评论</a>
-            {% endif %}
-        </h4>
-    {% endfor %}
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">Meng's Blog</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="/">大厅</a>
+                    </li>
+                    <li><a href="/user/{{u.username}}">房间</a>
+                    </li>
+                    <li><a href="/test">测试</a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Action</a>
+                            </li>
+                            <li><a href="#">Another action</a>
+                            </li>
+                            <li><a href="#">Something else here</a>
+                            </li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header">Nav header</li>
+                            <li><a href="#">Separated link</a>
+                            </li>
+                            <li><a href="#">One more separated link</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/login">登陆</a>
+                    </li>
+                </ul>
+            </div>
+            <!--/.nav-collapse -->
+        </div>
+    </div>
 
+    <div class="container">
+        <div class="page-wrapper">
+            <div class="row">
+
+                <h1 class="page-header">
+                    Long time no see!
+                </h1>
+
+                <form class="form-group">
+                    <textarea class="form-control" rows="3" id="id-textarea-post"></textarea>
+                    <br>
+                    <button type="button" class="btn btn-sm btn-primary"
+                            id="id-button-submit">发表</button>
+                </form>
+
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#home" data-toggle="tab">主页</a>
+                    </li>
+                    <li><a href="#profile" data-toggle="tab" id="id-click-profile">特别关注</a>
+                    </li>
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <!--<home>-->
+                    <div class="tab-pane fade in active" id="home">
+                        <br>
+                        <div class="div-home-post"></div>
+                        {% for post in posts %}
+                        <div class="post-{{post.id}}">
+                            <div class="media">
+                                <a class="pull-left" href="/user/{{post.user.username}}">
+                                    <img class="media-object" src={{post.user.img}} alt="">
+                                </a>
+                                <div class="media-body">
+                                    <h4 class="media-heading">{{post.user.username}}
+                                        <small>{{post.timestamp}}</small>
+                                    </h4>
+                                    {{post.content}}
+                                    <div class="post-footer">
+                                        <a href="/post/{{post.id}}">
+                                            <button type="button" class="btn btn-xs btn-info">评论</button>
+                                        </a>
+                                        {% if u == post.user %}
+                                            <button type="button" class="btn btn-xs btn-danger button-delete"
+                                                     data-pid="{{post.id}}">删除</button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <!--<home>-->
+
+                    <!--<profile>-->
+                    <div class="tab-pane fade" id="profile">
+                        <!--<div-profile-post>-->
+                        <br>
+                        <div class="div-profile-post"></div>
+                        <!--<div-profile-post>-->
+                        {% for post in u.followed_posts()%}
+                        <div class="post-{{post.id}}">
+                            <div class="media">
+                                <a class="pull-left" href="/user/{{post.user.username}}">
+                                    <img class="media-object" src={{post.user.img}} alt="">
+                                </a>
+                                <div class="media-body">
+                                    <h4 class="media-heading">{{post.user.username}}
+                                        <small>{{post.timestamp}}</small>
+                                    </h4>
+                                    {{post.content}}
+                                    <div class="post-footer">
+                                        <a href="/post/{{post.id}}">
+                                            <button type="button" class="btn btn-xs btn-info">评论</button>
+                                        </a>
+                                        {% if post.user == u %}
+                                        <button type="button" class="btn btn-xs btn-danger button-delete"
+                                                data-pid="{{post.id}}">删除</button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                        </div>
+
+                        {% endfor %}
+                    </div>
+                    <!--<profile>-->
+                </div>
+                <!--<Tab panes>-->
+            </div>
+            <!--<row>-->
+        </div>
+        <!--<page-wrapper>-->
+    </div>
+    <!--<container>-->
 
 </body>
 </html>

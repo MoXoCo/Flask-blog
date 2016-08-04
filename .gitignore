@@ -1,4 +1,4 @@
-# 常用 gitignore
+﻿# 常用 gitignore
 __pycache__/
 
 *.pyc
@@ -8,6 +8,7 @@ __pycache__/
 tmp/*
 
 db.sqlite
+db1.sqlite
 
 .DS_Store
 
