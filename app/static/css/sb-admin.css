@@ -19,6 +19,12 @@ body {
     margin-left: 280px;
 }
 
+.div-one {
+    width:480px;
+    height:600px;
+    overflow:hidden;
+}
+
 div.post-footer {
     text-align: right;
 }

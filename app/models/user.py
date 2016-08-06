@@ -5,6 +5,7 @@ from . import Follow
 from . import Post
 
 
+
 class User(db.Model, ReprMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -13,6 +14,12 @@ class User(db.Model, ReprMixin):
     timestamp = db.Column(db.String(), default=created_time)
     role = db.Column(db.Integer, default=2)
     img = db.Column(db.String(), default='/static/img/1.jpg')
+    address = db.Column(db.String())
+    profession = db.Column(db.String())
+    company = db.Column(db.String())
+    position = db.Column(db.String())
+    education = db.Column(db.String())
+    signature = db.Column(db.String())
     posts = db.relationship('Post', backref='user', lazy='dynamic')
     comments = db.relationship('Comment', backref='user', lazy='dynamic')
     ats = db.relationship('At', backref='user', lazy='dynamic')
@@ -36,6 +43,29 @@ class User(db.Model, ReprMixin):
         self.followed.append(Follow(followed=self, follower=self))
         if self.username == 'admin':
             self.role = 1
+
+
+    def save_personal_msg(self, form):
+        self.address = form.get('address', '')
+        self.profession = form.get('profession', '')
+        self.company = form.get('company', '')
+        self.position = form.get('position', '')
+        self.education = form.get('education', '')
+        self.signature = form.get('signature', '')
+        self.save()
+
+    def personal_msg(self):
+        form = dict(
+            username=self.username,
+            address=self.address,
+            profession=self.profession,
+            company=self.company,
+            position=self.position,
+            education=self.education,
+            signature=self.signature,
+        )
+        return form
+
 
     def json(self):
         self.id

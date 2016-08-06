@@ -47,7 +47,7 @@ def user(username):
 @main.route('/test')
 def test():
     u = current_user()
-    return render_template('test_user.html', u=u)
+    return render_template('form.html', u=u)
 
 
 

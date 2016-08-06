@@ -32,6 +32,9 @@
     <!-- Custom Fonts -->
     <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
+        <!-- Social Buttons CSS -->
+    <link href="/static/bower_components/bootstrap-social/bootstrap-social.css" rel="stylesheet">
+
     <!-- MetisMenu CSS -->
     <link href="/static/bower_components/metisMenu/dist/metisMenu.min.css" rel="stylesheet">
 
@@ -45,6 +48,7 @@
     <script src="/static/js/api_js/api.js"></script>
     <script src="/static/js/api_js/follow.js"></script>
     <script src="/static/js/api_js/at.js"></script>
+    <script src="/static/js/api_js/user_form.js"></script>
     <script>
         // 绑定事件
         var bindActions = function() {
@@ -60,6 +64,25 @@
                 unfollowUser(name);
             });
 
+            // 加载填写资料表单
+            $(document).on('click', '#id-button-form-right', function() {
+                var name = this.dataset.name;
+                insertMsgForm(name);
+            });
+
+            // 取消填写资料表单
+            $(document).on('click', '#id-button-form-left', function() {
+                var name = this.dataset.name;
+                deleteFormTemplate(name);
+            });
+
+            // 提交资料表单
+            $(document).on('click', '#id-button-submit-form', function() {
+                var name = this.dataset.name;
+                log('name', name)
+                submitForm(name);
+            });
+
             // 下拉@我的
             $(document).on('click', '#id-button-down', function() {
                 var name = this.dataset.name;
@@ -70,14 +93,12 @@
             $(document).on('click', '#id-button-up', function() {
                 var name = this.dataset.name;
                 deleteAtPost(name);
-
             });
         };
 
         $(document).ready(function() {
             bindActions();
         });
-
     </script>
 
 </head>
@@ -143,10 +164,24 @@
                                 </a>
                                 <div class="media-body">
                                     <div class="col-md-12">
-                                        <h4 class="text-info">用户名： {{user.username}}</h4>
-                                        <h4 class="text-warning">性别:  男 </h4>
-                                        <h4 class="text-danger">爱好： 赵敏</h4>
-                                        <h4 class="text-success">个性签名：其实张无忌也色，他认识的他都抱过。</h4>
+                                        <h4>{{user.username}}</h4>
+                                        <p class="text-warning"><i class="glyphicon glyphicon-map-marker"></i>
+                                            {% if user.address %}{{user.address}}{% else%}居住地{%endif%} | {% if user.profession %}{{user.profession}}{% else%}行业{%endif%}
+                                        </p>
+                                        <p class="text-danger"><i class="glyphicon glyphicon-briefcase"></i>
+                                            {% if user.company %}{{user.company}}{% else%}公司{%endif%} | {% if user.position %}{{user.position}}{% else%}职位{%endif%}
+                                        </p>
+                                        <p class="text-info"><i class="glyphicon glyphicon-education"></i>
+                                            {% if user.education %}{{user.education}}{% else%}教育{%endif%}
+                                        </p>
+                                        <p class="text-success"><i class="glyphicon glyphicon-tag"></i>
+                                            {% if user.signature %}{{user.signature}}{% else%}个性签名{%endif%}
+                                        </p>
+                                        <p class="text-primary">
+                                            <a href="#">关注了 <span class="badge">{{user.followed.count()-1}}</span></a>
+                                            |
+                                            <a href="#">关注者 <span class="badge">{{user.follower.count()-1}}</span></a>
+                                        </p>
                                         {% if u != user %}
                                             <div id="div-button">
                                             {% if not u.is_following(user.id )%}
@@ -157,11 +192,17 @@
                                                         id="id-button-unfollow" data-name="{{user.username}}">取关</button>
                                             {% endif %}
                                             </div>
+                                        {% else %}
+                                            <div id="id-div-button-form">
+                                                <button type="button" class="btn btn-outline btn-default pull-right"
+                                                    id="id-button-form-right"
+                                                    data-name="{{user.username}}">填写资料<i class="glyphicon glyphicon-chevron-right"></i></button>
+                                            </div>
                                         {% endif %}
+
                                     <!-- /.panel-body -->
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -209,42 +250,13 @@
                             </ul>
                         </div>
                     </div>
-
                 </div>
 
-                <div class="col-lg-4">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Context Classes
-                        </div>
-                        <!-- /.panel-heading -->
-                        <div class="panel-body">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>First Name</th>
-                                            <th>Last Name</th>
-                                            <th>Username</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>1</td>
-                                            <td>Mark</td>
-                                            <td>Otto</td>
-                                            <td>@mdo</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <!-- /.table-responsive -->
-                        </div>
-                        <!-- /.panel-body -->
-                    </div>
-                    <!-- /.panel -->
 
+                <div id="id-div-form"></div>
+
+                <div class="col-lg-4">
+                    {% if user == u%}
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             @我的
@@ -262,6 +274,12 @@
                         <!-- /.panel-body -->
                     </div>
                     <!-- /.panel -->
+                    {% endif %}
+
+                    <div class="div-one">
+                        <iframe src="http://www.simond.cc" style="zoom:50%" width="720" height="1600"></iframe>
+                    </div>
+
                 </div>
                 <!--<col-lg-4>-->
             </div>

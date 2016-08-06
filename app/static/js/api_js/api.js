@@ -10,10 +10,10 @@ var formFromKeys = function(keys, prefix) {
         var key = keys[i];
         var tagid = prefix + key;
         var value = $('#' + tagid).val();
-        if (value.length < 1) {
-            // alert('字段不能为空');
-            break;
-        }
+//        if (value.length < 1) {
+//            alert('字段不能为空');
+//            break;
+//        }
         form[key] = value;
     }
     return form;
@@ -109,6 +109,17 @@ vip.userUnFollow = function(form, response) {
 // at api
 vip.atPostInsert = function(form, response) {
     var url = '/api/at/user/' + form.name;
+    this.get(url, response);
+};
+
+// personal msg api
+vip.formSubmit = function(form, response) {
+    var url = '/api/personal/msg/' + form.name;
+    this.post(url, form, response);
+};
+
+vip.formMsg = function(form, response) {
+    var url = '/api/personal/msg/' + form.name;
     this.get(url, response);
 };
 
