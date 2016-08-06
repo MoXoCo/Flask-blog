@@ -56,8 +56,10 @@
                 <ul class="nav navbar-nav">
                     <li class="active"><a href="/">大厅</a>
                     </li>
-                    <li><a href="/user/{{u.username}}">房间</a>
-                    </li>
+                    {% if u != none %}
+                        <li><a href="/user/{{u.username}}">房间</a>
+                        </li>
+                    {% endif %}
                     <li><a href="/test">测试</a>
                     </li>
                     <li class="dropdown">
@@ -79,9 +81,15 @@
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
+                    {% if u == none  %}
                     <li>
                         <a href="/login">登陆</a>
                     </li>
+                    {% else %}
+                    <li>
+                        <a href="/logout">注销</a>
+                    </li>
+                    {% endif %}
                 </ul>
             </div>
             <!--/.nav-collapse -->
@@ -106,8 +114,10 @@
                 <ul class="nav nav-tabs">
                     <li class="active"><a href="#home" data-toggle="tab">主页</a>
                     </li>
+                    {% if u == user%}
                     <li><a href="#profile" data-toggle="tab" id="id-click-profile">特别关注</a>
                     </li>
+                    {% endif %}
                 </ul>
 
                 <!-- Tab panes -->
@@ -120,7 +130,7 @@
                         <div class="post-{{post.id}}">
                             <div class="media">
                                 <a class="pull-left" href="/user/{{post.user.username}}">
-                                    <img class="media-object" src={{post.user.img}} alt="">
+                                    <img class="media-object" src={{post.user.img}} width="64" height="64" alt="">
                                 </a>
                                 <div class="media-body">
                                     <h4 class="media-heading">{{post.user.username}}
@@ -150,11 +160,12 @@
                         <br>
                         <div class="div-profile-post"></div>
                         <!--<div-profile-post>-->
+                        {% if u != none %}
                         {% for post in u.followed_posts()%}
                         <div class="post-{{post.id}}">
                             <div class="media">
                                 <a class="pull-left" href="/user/{{post.user.username}}">
-                                    <img class="media-object" src={{post.user.img}} alt="">
+                                    <img class="media-object" src={{post.user.img}} width="64" height="64" alt="">
                                 </a>
                                 <div class="media-body">
                                     <h4 class="media-heading">{{post.user.username}}
@@ -176,6 +187,7 @@
                         </div>
 
                         {% endfor %}
+                        {% endif %}
                     </div>
                     <!--<profile>-->
                 </div>

@@ -3,6 +3,7 @@ from . import ReprMixin
 from . import created_time
 from . import Follow
 from . import Post
+import random
 
 
 
@@ -13,7 +14,7 @@ class User(db.Model, ReprMixin):
     password = db.Column(db.String(), unique=True)
     timestamp = db.Column(db.String(), default=created_time)
     role = db.Column(db.Integer, default=2)
-    img = db.Column(db.String(), default='/static/img/1.jpg')
+    img = db.Column(db.String())
     address = db.Column(db.String())
     profession = db.Column(db.String())
     company = db.Column(db.String())
@@ -41,6 +42,7 @@ class User(db.Model, ReprMixin):
         self.username = form.get('username', None)
         self.password = form.get('password', None)
         self.followed.append(Follow(followed=self, follower=self))
+        self.img = '/static/img/' + str(random.randint(1,4)) + '.jpg'
         if self.username == 'admin':
             self.role = 1
 

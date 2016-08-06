@@ -44,11 +44,6 @@ def user(username):
     return render_template('user.html', **args)
 
 
-@main.route('/test')
-def test():
-    u = current_user()
-    return render_template('form.html', u=u)
-
 
 
 

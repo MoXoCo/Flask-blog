@@ -116,10 +116,12 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li class="active"><a href="/">大厅</a>
+                    <li><a href="/">大厅</a>
                     </li>
+                    {% if u != none %}
                     <li><a href="/user/{{u.username}}">房间</a>
                     </li>
+                    {% endif %}
                     <li><a href="/test">测试</a>
                     </li>
                     <li class="dropdown">
@@ -141,9 +143,15 @@
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
+                    {% if u == none  %}
                     <li>
                         <a href="/login">登陆</a>
                     </li>
+                    {% else %}
+                    <li>
+                        <a href="/logout">注销</a>
+                    </li>
+                    {% endif %}
                 </ul>
             </div>
             <!--/.nav-collapse -->
@@ -182,22 +190,24 @@
                                             |
                                             <a href="#">关注者 <span class="badge">{{user.follower.count()-1}}</span></a>
                                         </p>
-                                        {% if u != user %}
-                                            <div id="div-button">
-                                            {% if not u.is_following(user.id )%}
-                                                <button type="button" class="btn btn-primary"
-                                                        id="id-button-follow" data-name="{{user.username}}">关注</button>
+                                        {% if u != none %}
+                                            {% if u != user %}
+                                                <div id="div-button">
+                                                {% if not u.is_following(user.id )%}
+                                                    <button type="button" class="btn btn-primary"
+                                                            id="id-button-follow" data-name="{{user.username}}">关注</button>
+                                                {% else %}
+                                                    <button type="button" class="btn btn-danger"
+                                                            id="id-button-unfollow" data-name="{{user.username}}">取关</button>
+                                                {% endif %}
+                                                </div>
                                             {% else %}
-                                                <button type="button" class="btn btn-danger"
-                                                        id="id-button-unfollow" data-name="{{user.username}}">取关</button>
+                                                <div id="id-div-button-form">
+                                                    <button type="button" class="btn btn-outline btn-default pull-right"
+                                                        id="id-button-form-right"
+                                                        data-name="{{user.username}}">填写资料<i class="glyphicon glyphicon-chevron-right"></i></button>
+                                                </div>
                                             {% endif %}
-                                            </div>
-                                        {% else %}
-                                            <div id="id-div-button-form">
-                                                <button type="button" class="btn btn-outline btn-default pull-right"
-                                                    id="id-button-form-right"
-                                                    data-name="{{user.username}}">填写资料<i class="glyphicon glyphicon-chevron-right"></i></button>
-                                            </div>
                                         {% endif %}
 
                                     <!-- /.panel-body -->

@@ -8,8 +8,8 @@ var insertTemplate = function(comment) {
     var template = `
         <div class="div-comments">
             <div class="media">
-                <a class="pull-left" href="#">
-                    <img class="media-object" src=${img} alt="">
+                <a class="pull-left" href="/user/${username}">
+                    <img class="media-object" src=${img} width="64" height="64" alt="">
                 </a>
                 <div class="media-body">
                     <h4 class="media-heading">${username}
