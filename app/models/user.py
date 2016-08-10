@@ -11,7 +11,7 @@ class User(db.Model, ReprMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(), unique=True)
-    password = db.Column(db.String(), unique=True)
+    password = db.Column(db.String())
     timestamp = db.Column(db.String(), default=created_time)
     role = db.Column(db.Integer, default=2)
     img = db.Column(db.String())
@@ -157,6 +157,7 @@ class User(db.Model, ReprMixin):
             Post.timestamp.desc()
         ).all()
         return posts
+
 
     def user_ated_num(self):
         ated_num = self.ats.filter_by(is_readed=False).count()

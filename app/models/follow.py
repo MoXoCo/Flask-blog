@@ -12,7 +12,7 @@ class Follow(db.Model, ReprMixin):
 
     def __repr__(self):
         return u'<User({}) follow User({})>'.format(
-            self.follow_id, self.followed_id
+            self.follower_id, self.followed_id
         )
 
     def save(self):

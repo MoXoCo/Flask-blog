@@ -52,16 +52,30 @@
     <script>
         // 绑定事件
         var bindActions = function() {
-            // 关注
+            // 关注（用户资料栏）
             $(document).on('click', '#id-button-follow',function() {
                 var name = this.dataset.name;
                 followUser(name);
             });
 
-            // 取关
+            // 取关（用户资料栏）
             $(document).on('click', '#id-button-unfollow', function() {
                 var name = this.dataset.name;
                 unfollowUser(name);
+            });
+
+            // 取关（关注列表栏）
+            $(document).on('click', '#id-button-unfollow-follower', function() {
+                var name = this.dataset.name;
+                var id = this.dataset.id;
+                unfollowFollower(name, id);
+            });
+
+            // 关注（关注列表栏）
+            $(document).on('click', '#id-button-follow-follower',function() {
+                var name = this.dataset.name;
+                var id = this.dataset.id;
+                followFollower(name, id)
             });
 
             // 加载填写资料表单
@@ -204,45 +218,49 @@
 
                     <div class="panel panel-danger">
                         <div class="panel-heading">
-                            <i class="fa fa-clock-o fa-fw"></i> 时间栏
+                            {{user.username}} 关注了 {{user.followed.count()-1}} 人
+                            <div class="pull-right">
+                                <a href="/user/{{user.username}}">
+                                    返回个人主页
+                                </a>
+                            </div>
+
                         </div>
-                        <!-- /.panel-heading -->
                         <div class="panel-body">
-                            <ul class="timeline">
-                                {% for post in posts%}
-                                    {% if post.direction == 'left'%}
-                                        <li>
-                                            <!--<div class="timeline-badge danger"><i class="fa fa-check"></i>-->
-                                            <!--</div>-->
-                                            <div class="timeline-panel">
-                                                <div class="timeline-heading">
-                                                    <h4 class="timeline-title">{{post.user.username}}</h4>
-                                                    <p><small class="text-muted"><i class="fa fa-clock-o"></i> {{post.timestamp}}</small>
-                                                    </p>
-                                                </div>
-                                                <div class="timeline-body">
-                                                    <p>{{post.content}}</p>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    {% else %}
-                                        <li class="timeline-inverted">
-                                            <!--<div class="timeline-badge warning"><i class="fa fa-credit-card"></i>-->
-                                            <!--</div>-->
-                                            <div class="timeline-panel">
-                                                <div class="timeline-heading">
-                                                    <h4 class="timeline-title">{{post.user.username}}</h4>
-                                                    <p><small class="text-muted"><i class="fa fa-clock-o"></i> {{post.timestamp}}</small>
-                                                    </p>
-                                                </div>
-                                                <div class="timeline-body">
-                                                    <p>{{post.content}}</p>
-                                                </div>
-                                            </div>
-                                        </li>
+                            {% for followee in follows %}
+                            <div class="media">
+                                <a class="pull-left" href="/user/{{followee.username}}">
+                                    <img class="media-object" src={{followee.img}} width="64" height="64" alt="">
+                                </a>
+                                <div class="media-body">
+                                    <h4 class="media-heading">{{followee.username}}</h4>
+                                    {% if followee.signature%}
+                                    <p>
+                                        {{followee.signature}}
+                                    </p>
                                     {% endif %}
-                                {% endfor %}
-                            </ul>
+                                    <span class="text-muted">
+                                        <a href="/{{followee.username}}/followees">
+                                            关注了 {{followee.followed.count()-1}}
+                                        </a>
+                                        |
+                                        <a href="/{{followee.username}}/followers">
+                                            关注者 {{followee.follower.count()-1}}
+                                        </a>
+                                    </span>
+                                    {% if u == user %}
+                                        {% if user.is_following(followee.id) %}
+                                        <div class="pull-right" id="id-div-follow-{{followee.id}}">
+                                            <button type="button" class="btn btn-xs btn-danger"
+                                                id="id-button-unfollow-follower" data-name="{{followee.username}}"
+                                                data-id="{{followee.id}}">取关</button>
+                                        </div>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <hr>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>

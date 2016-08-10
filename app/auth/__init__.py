@@ -3,6 +3,7 @@ from flask import url_for
 from flask import render_template
 from flask import jsonify
 from flask import session
+from flask import redirect
 from flask import Blueprint
 from ..api import api_response
 from ..models import Post
@@ -59,3 +60,9 @@ def login():
         msg = '登录失败'
         r = api_response().error(message=msg)
     return jsonify(r)
+
+
+@auth.route('/logout')
+def logout():
+    session.pop('username')
+    return redirect(url_for('.login_view'))

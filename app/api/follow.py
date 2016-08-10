@@ -24,3 +24,4 @@ def unfollow(username):
         u.unfollow(user.id)
         r = api_response().success()
         return jsonify(r)
+
