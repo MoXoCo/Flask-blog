@@ -1,3 +1,19 @@
+var increaseFollowNum = function() {
+    var followNum = $('#id-span-follower').html();
+    var num_int = parseInt(followNum) + 1;
+    // 取出 dom 元素
+    $('#id-span-follower')[0].innerHTML = num_int;
+};
+
+var reduceFollowNum = function() {
+    var followNum = $('#id-span-follower').html();
+    var num_int = parseInt(followNum) - 1;
+    // 取出 dom 元素
+    $('#id-span-follower')[0].innerHTML = num_int;
+};
+
+
+
 var insertFollowTemplate = function(name) {
     var t = `
         <button type="button" class="btn btn-danger"
@@ -13,7 +29,6 @@ var insertUnfollowTemplate = function(name) {
             id="id-button-follow" data-name="${name}">关注</button>
     `;
     $('#id-button-unfollow').remove();
-    log('div: ', div)
     $('#div-button').append(t);
 };
 
@@ -24,6 +39,7 @@ var insertFollowFollowerTemplate = function(name, id) {
             id="id-button-unfollow-follower" data-name="${name}"
             data-id="${id}">取关</button>
     `;
+    increaseFollowNum()
     var div = '#id-div-follow-' + id;
     $(div).children().remove('#id-button-follow-follower');
     $(div).append(t);
@@ -35,6 +51,7 @@ var insertUnfollowFollowerTemplate = function(name, id) {
             id="id-button-follow-follower" data-name="${name}"
             data-id="${id}">关注</button>
     `;
+    reduceFollowNum()
     var div = '#id-div-follow-' + id;
     $(div).children().remove();
     $(div).append(t);

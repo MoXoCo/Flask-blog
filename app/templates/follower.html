@@ -181,11 +181,11 @@
                                         </p>
                                         <p class="text-primary">
                                             <a href="/{{user.username}}/followees">
-                                                关注了 <span class="badge">{{user.followed.count()-1}}</span>
+                                                关注了 <span class="badge" id='id-span-followee'>{{user.followed.count()-1}}</span>
                                             </a>
                                             |
                                             <a href="/{{user.username}}/followers">
-                                                关注者 <span class="badge">{{user.follower.count()-1}}</span>
+                                                关注者 <span class="badge" id='id-span-follower'>{{user.follower.count()-1}}</span>
                                             </a>
                                         </p>
                                         {% if u != none %}
@@ -219,7 +219,7 @@
                         <div class="panel-heading">
                             {{user.username}} 被 {{user.follower.count()-1}} 人关注
                             <div class="pull-right">
-                                <a href="/blog/user/{{user.username}}">
+                                <a href="/user/{{user.username}}">
                                     返回个人主页
                                 </a>
                             </div>
@@ -228,7 +228,7 @@
                         <div class="panel-body">
                             {% for follower in follows %}
                             <div class="media">
-                                <a class="pull-left" href="/blog/user/{{follower.username}}">
+                                <a class="pull-left" href="/user/{{follower.username}}">
                                     <img class="media-object" src={{follower.img}} width="64" height="64" alt="">
                                 </a>
                                 <div class="media-body">
@@ -239,23 +239,27 @@
                                     </p>
                                     {% endif %}
                                     <span class="text-muted">
-                                        <a href="/blog/{{follower.username}}/followees">
+                                        <a href="/{{follower.username}}/followees">
                                             关注了 {{follower.followed.count()-1}}
                                         </a>
                                         |
-                                        <a href="/blog/{{follower.username}}/followers">
+                                        <a href="/{{follower.username}}/followers">
                                             关注者 {{follower.follower.count()-1}}
                                         </a>
                                     </span>
-                                    {% if u == user %}
-                                        {% if not user.is_following(follower.id) %}
+
+                                    {% if u.id != follower.id %}
+                                        {% if not u.is_following(follower.id) %}
                                         <div class="pull-right" id="id-div-follow-{{follower.id}}">
-                                            <button type="button" class="btn btn-xs btn-primary"
-                                                id="id-button-follow-follower" data-name="{{follower.username}}"
-                                                data-id="{{follower.id}}">关注</button>
+                                            <button type="button" class="btn btn-xs btn-primary" id="id-button-follow-follower" data-name="{{follower.username}}" data-id="{{follower.id}}">关注</button>
+                                        </div>
+                                        {% else %}
+                                        <div class="pull-right" id="id-div-follow-{{follower.id}}">
+                                            <button type="button" class="btn btn-xs btn-danger" id="id-button-unfollow-follower" data-name="{{follower.username}}" data-id="{{follower.id}}">取关</button>
                                         </div>
                                         {% endif %}
                                     {% endif %}
+
                                 </div>
                             </div>
                             <hr>

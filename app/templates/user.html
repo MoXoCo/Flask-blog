@@ -168,11 +168,11 @@
                                         </p>
                                         <p class="text-primary">
                                             <a href="/{{user.username}}/followees">
-                                                关注了 <span class="badge">{{user.followed.count()-1}}</span>
+                                                关注了 <span class="badge" id='id-span-followee'>{{user.followed.count()-1}}</span>
                                             </a>
                                             |
                                             <a href="/{{user.username}}/followers">
-                                                关注者 <span class="badge">{{user.follower.count()-1}}</span>
+                                                关注者 <span class="badge" id='id-span-follower'>{{user.follower.count()-1}}</span>
                                             </a>
                                         </p>
                                         {% if u != none %}
